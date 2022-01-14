@@ -28,7 +28,7 @@ class RestClient(ABC):
         pass
 
     @abstractmethod
-    def put(self, url: str, body: Union[dict, list], headers: Optional[dict] = None) -> Response:
+    def put(self, url: str, body: Union[dict, list, str], headers: Optional[dict] = None) -> Response:
         pass
 
     @abstractmethod
@@ -88,7 +88,7 @@ class ApikeyClient(RestClient):
 
         return requests.get(url, params=query_params, headers=headers)
 
-    def put(self, url: str, body: Union[dict, list], headers: Optional[dict] = None) -> Response:
+    def put(self, url: str, body: Union[dict, list, str], headers: Optional[dict] = None) -> Response:
         if headers is None:
             headers = {}
 
@@ -267,17 +267,17 @@ class Oauth2Client(RestClient):
 
         return get_request(self, True)
 
-    def put(self, url: str, body: Union[dict, list], headers: Optional[dict] = None) -> Response:
+    def put(self, url: str, body: Union[dict, list, str], headers: Optional[dict] = None) -> Response:
         if headers is None:
             headers = {}
 
         def put_request(client: Optional, retry: bool):
             logger.debug(f"Performing put request with token {client.token} {client.refresh_token}")
-            headers.update(client.get(client.token))
+            headers.update(client.get_authentication(client.token))
             response = requests.put(url, json=body, headers=headers)
             if response.status_code in [400, 401, 403]:
                 if retry:
-                    self.refresh_access_token()
+                    client.refresh_access_token()
                     return put_request(client, False)
                 else:
                     return response
