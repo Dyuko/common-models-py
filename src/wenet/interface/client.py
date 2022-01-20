@@ -20,19 +20,19 @@ class RestClient(ABC):
         pass
 
     @abstractmethod
-    def post(self, url: str, body: Union[dict, list], headers: Optional[dict] = None) -> Response:
+    def post(self, url: str, body: Union[dict, list], headers: Optional[dict] = None, request_records: Optional[list] = None) -> Response:
         pass
 
     @abstractmethod
-    def get(self, url: str, query_params: Optional[dict] = None, headers: Optional[dict] = None) -> Response:
+    def get(self, url: str, query_params: Optional[dict] = None, headers: Optional[dict] = None, request_records: Optional[list] = None) -> Response:
         pass
 
     @abstractmethod
-    def put(self, url: str, body: Union[dict, list, str], headers: Optional[dict] = None) -> Response:
+    def put(self, url: str, body: Union[dict, list], headers: Optional[dict] = None, request_records: Optional[list] = None) -> Response:
         pass
 
     @abstractmethod
-    def delete(self, url: str, query_params: Optional[dict] = None, headers: Optional[dict] = None) -> Response:
+    def delete(self, url: str, query_params: Optional[dict] = None, headers: Optional[dict] = None, request_records: Optional[list] = None) -> Response:
         pass
 
 
@@ -41,16 +41,16 @@ class NoAuthenticationClient(RestClient):
     def get_authentication(self) -> dict:
         pass
 
-    def post(self, url: str, body: Union[dict, list], headers: Optional[dict] = None) -> Response:
+    def post(self, url: str, body: Union[dict, list], headers: Optional[dict] = None, request_records: Optional[list] = None) -> Response:
         return requests.post(url, json=body, headers=headers)
 
-    def get(self, url: str, query_params: Optional[dict] = None, headers: Optional[dict] = None) -> Response:
+    def get(self, url: str, query_params: Optional[dict] = None, headers: Optional[dict] = None, request_records: Optional[list] = None) -> Response:
         return requests.get(url, params=query_params, headers=headers)
 
-    def put(self, url: str, body: Union[dict, list], headers: Optional[dict] = None) -> Response:
+    def put(self, url: str, body: Union[dict, list], headers: Optional[dict] = None, request_records: Optional[list] = None) -> Response:
         return requests.put(url, json=body, headers=headers)
 
-    def delete(self, url: str, query_params: Optional[dict] = None, headers: Optional[dict] = None) -> Response:
+    def delete(self, url: str, query_params: Optional[dict] = None, headers: Optional[dict] = None, request_records: Optional[list] = None) -> Response:
         return requests.delete(url, params=query_params, headers=headers)
 
 
@@ -72,7 +72,7 @@ class ApikeyClient(RestClient):
             self._component_authorization_apikey_header: self._apikey
         }
 
-    def post(self, url: str, body: Union[dict, list], headers: Optional[dict] = None) -> Response:
+    def post(self, url: str, body: Union[dict, list], headers: Optional[dict] = None, request_records: Optional[list] = None) -> Response:
         if headers is None:
             headers = {}
 
@@ -80,7 +80,7 @@ class ApikeyClient(RestClient):
 
         return requests.post(url, json=body, headers=headers)
 
-    def get(self, url: str, query_params: Optional[dict] = None, headers: Optional[dict] = None) -> Response:
+    def get(self, url: str, query_params: Optional[dict] = None, headers: Optional[dict] = None, request_records: Optional[list] = None) -> Response:
         if headers is None:
             headers = {}
 
@@ -88,7 +88,7 @@ class ApikeyClient(RestClient):
 
         return requests.get(url, params=query_params, headers=headers)
 
-    def put(self, url: str, body: Union[dict, list, str], headers: Optional[dict] = None) -> Response:
+    def put(self, url: str, body: Union[dict, list], headers: Optional[dict] = None, request_records: Optional[list] = None) -> Response:
         if headers is None:
             headers = {}
 
@@ -96,7 +96,7 @@ class ApikeyClient(RestClient):
 
         return requests.put(url, json=body, headers=headers)
 
-    def delete(self, url: str, query_params: Optional[dict] = None, headers: Optional[dict] = None) -> Response:
+    def delete(self, url: str, query_params: Optional[dict] = None, headers: Optional[dict] = None, request_records: Optional[list] = None) -> Response:
         if headers is None:
             headers = {}
 
@@ -229,7 +229,7 @@ class Oauth2Client(RestClient):
             "authorization": f"bearer {token}"
         }
 
-    def post(self, url: str, body: Union[dict, list], headers: Optional[dict] = None) -> Response:
+    def post(self, url: str, body: Union[dict, list], headers: Optional[dict] = None, request_records: Optional[list] = None) -> Response:
         if headers is None:
             headers = {}
 
@@ -237,6 +237,13 @@ class Oauth2Client(RestClient):
             logger.debug(f"Performing post request with token {client.token} {client.refresh_token}")
             headers.update(client.get_authentication(client.token))
             response = requests.post(url, json=body, headers=headers)
+            record = {
+                "url": url,
+                "method" : "post",
+                "respond" : response.status_code
+            }
+            if request_records is not None:
+                request_records.append(record)
             if response.status_code in [400, 401, 403]:
                 if retry:
                     client.refresh_access_token()
@@ -248,7 +255,7 @@ class Oauth2Client(RestClient):
 
         return post_request(self, True)
 
-    def get(self, url: str, query_params: Optional[dict] = None, headers: Optional[dict] = None) -> Response:
+    def get(self, url: str, query_params: Optional[dict] = None, headers: Optional[dict] = None, request_records: Optional[list] = None) -> Response:
         if headers is None:
             headers = {}
 
@@ -256,6 +263,13 @@ class Oauth2Client(RestClient):
             logger.debug(f"Performing get request with token {client.token} {client.refresh_token}")
             headers.update(client.get_authentication(client.token))
             response = requests.get(url, params=query_params, headers=headers)
+            record = {
+                "url": url,
+                "method" : "get",
+                "respond" : response.status_code
+            }
+            if request_records is not None:
+                request_records.append(record)
             if response.status_code in [400, 401, 403]:
                 if retry:
                     client.refresh_access_token()
@@ -267,7 +281,7 @@ class Oauth2Client(RestClient):
 
         return get_request(self, True)
 
-    def put(self, url: str, body: Union[dict, list, str], headers: Optional[dict] = None) -> Response:
+    def put(self, url: str, body: Union[dict, list], headers: Optional[dict] = None, request_records: Optional[list] = None) -> Response:
         if headers is None:
             headers = {}
 
@@ -275,6 +289,13 @@ class Oauth2Client(RestClient):
             logger.debug(f"Performing put request with token {client.token} {client.refresh_token}")
             headers.update(client.get_authentication(client.token))
             response = requests.put(url, json=body, headers=headers)
+            record = {
+                "url": url,
+                "method" : "put",
+                "respond" : response.status_code
+            }
+            if request_records is not None:
+                request_records.append(record)
             if response.status_code in [400, 401, 403]:
                 if retry:
                     client.refresh_access_token()
@@ -286,7 +307,7 @@ class Oauth2Client(RestClient):
 
         return put_request(self, True)
 
-    def delete(self, url: str, query_params: Optional[dict] = None, headers: Optional[dict] = None) -> Response:
+    def delete(self, url: str, query_params: Optional[dict] = None, headers: Optional[dict] = None, request_records: Optional[list] = None) -> Response:
         if headers is None:
             headers = {}
 
@@ -294,6 +315,13 @@ class Oauth2Client(RestClient):
             logger.debug(f"Performing delete request with token {client.token} {client.refresh_token}")
             headers.update(client.get_authentication(client.token))
             response = requests.delete(url, params=query_params, headers=headers)
+            record = {
+                "url": url,
+                "method" : "delete",
+                "respond" : response.status_code
+            }
+            if request_records is not None:
+                request_records.append(record)
             if response.status_code in [400, 401, 403]:
                 if retry:
                     client.refresh_access_token()

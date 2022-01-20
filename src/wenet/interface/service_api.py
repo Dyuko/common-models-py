@@ -33,13 +33,13 @@ class ServiceApiInterface(ComponentInterface):
             base_url = platform_url + component_path
         super().__init__(client, base_url, extra_headers)
 
-    def get_token_details(self, headers: Optional[dict] = None) -> TokenDetails:
+    def get_token_details(self, headers: Optional[dict] = None, request_records: Optional[list] = None) -> TokenDetails:
         if headers is not None:
             headers.update(self._base_headers)
         else:
             headers = self._base_headers
 
-        response = self._client.get(f"{self._base_url}{self.TOKEN_ENDPOINT}", headers=headers)
+        response = self._client.get(f"{self._base_url}{self.TOKEN_ENDPOINT}", headers=headers, request_records=request_records)
 
         if response.status_code == 200:
             return TokenDetails.from_repr(response.json())
@@ -48,13 +48,13 @@ class ServiceApiInterface(ComponentInterface):
         else:
             raise Exception(f"Request has return a code [{response.status_code}] with content [{response.text}]")
 
-    def get_app_details(self, app_id: str, headers: Optional[dict] = None) -> AppDTO:
+    def get_app_details(self, app_id: str, headers: Optional[dict] = None, request_records: Optional[list] = None) -> AppDTO:
         if headers is not None:
             headers.update(self._base_headers)
         else:
             headers = self._base_headers
 
-        response = self._client.get(f"{self._base_url}{self.APP_ENDPOINT}/{app_id}", headers=headers)
+        response = self._client.get(f"{self._base_url}{self.APP_ENDPOINT}/{app_id}", headers=headers, request_records=request_records)
 
         if response.status_code == 200:
             return AppDTO.from_repr(response.json())
@@ -65,13 +65,13 @@ class ServiceApiInterface(ComponentInterface):
         else:
             raise Exception(f"Request has return a code [{response.status_code}] with content [{response.text}]")
 
-    def get_app_users(self, app_id: str, headers: Optional[dict] = None) -> List[str]:
+    def get_app_users(self, app_id: str, headers: Optional[dict] = None, request_records: Optional[list] = None) -> List[str]:
         if headers is not None:
             headers.update(self._base_headers)
         else:
             headers = self._base_headers
 
-        response = self._client.get(f"{self._base_url}{self.APP_ENDPOINT}/{app_id}/users", headers=headers)
+        response = self._client.get(f"{self._base_url}{self.APP_ENDPOINT}/{app_id}/users", headers=headers, request_records=request_records)
 
         if response.status_code == 200:
             return response.json()
@@ -82,7 +82,7 @@ class ServiceApiInterface(ComponentInterface):
         else:
             raise Exception(f"Request has return a code [{response.status_code}] with content [{response.text}]")
 
-    def create_task(self, task: Task, headers: Optional[dict] = None) -> None:
+    def create_task(self, task: Task, headers: Optional[dict] = None, request_records: Optional[list] = None) -> None:
         if headers is not None:
             headers.update(self._base_headers)
         else:
@@ -90,7 +90,7 @@ class ServiceApiInterface(ComponentInterface):
 
         task_repr = task.to_repr()
         task_repr.pop("id", None)
-        response = self._client.post(f"{self._base_url}{self.TASK_ENDPOINT}", body=task_repr, headers=headers)
+        response = self._client.post(f"{self._base_url}{self.TASK_ENDPOINT}", body=task_repr, headers=headers, request_records=request_records)
 
         if response.status_code not in [200, 201]:
             if response.status_code in [401, 403]:
@@ -98,13 +98,13 @@ class ServiceApiInterface(ComponentInterface):
             else:
                 raise CreationError(response.status_code, response.text)
 
-    def get_task(self, task_id: str, headers: Optional[dict] = None) -> Task:
+    def get_task(self, task_id: str, headers: Optional[dict] = None, request_records: Optional[list] = None) -> Task:
         if headers is not None:
             headers.update(self._base_headers)
         else:
             headers = self._base_headers
 
-        response = self._client.get(f"{self._base_url}{self.TASK_ENDPOINT}/{task_id}", headers=headers)
+        response = self._client.get(f"{self._base_url}{self.TASK_ENDPOINT}/{task_id}", headers=headers, request_records=request_records)
 
         if response.status_code == 200:
             return Task.from_repr(response.json(), task_id)
@@ -115,13 +115,13 @@ class ServiceApiInterface(ComponentInterface):
         else:
             raise Exception(f"Request has return a code [{response.status_code}] with content [{response.text}]")
 
-    def create_task_transaction(self, transaction: TaskTransaction, headers: Optional[dict] = None) -> None:
+    def create_task_transaction(self, transaction: TaskTransaction, headers: Optional[dict] = None, request_records: Optional[list] = None) -> None:
         if headers is not None:
             headers.update(self._base_headers)
         else:
             headers = self._base_headers
 
-        response = self._client.post(f"{self._base_url}{self.TASK_ENDPOINT}/transaction", body=transaction.to_repr(), headers=headers)
+        response = self._client.post(f"{self._base_url}{self.TASK_ENDPOINT}/transaction", body=transaction.to_repr(), headers=headers, request_records=request_records)
 
         if response.status_code not in [200, 201]:
             if response.status_code in [401, 403]:
@@ -129,13 +129,13 @@ class ServiceApiInterface(ComponentInterface):
             else:
                 raise CreationError(response.status_code, response.text)
 
-    def get_user_profile(self, wenet_user_id: str, headers: Optional[dict] = None) -> CoreWeNetUserProfile:
+    def get_user_profile(self, wenet_user_id: str, headers: Optional[dict] = None, request_records: Optional[list] = None) -> CoreWeNetUserProfile:
         if headers is not None:
             headers.update(self._base_headers)
         else:
             headers = self._base_headers
 
-        response = self._client.get(f"{self._base_url}{self.USER_ENDPOINT}/profile/{wenet_user_id}", headers=headers)
+        response = self._client.get(f"{self._base_url}{self.USER_ENDPOINT}/profile/{wenet_user_id}", headers=headers, request_records=request_records)
 
         if response.status_code == 200:
             return CoreWeNetUserProfile.from_repr(response.json())
@@ -146,13 +146,13 @@ class ServiceApiInterface(ComponentInterface):
         else:
             raise Exception(f"Request has return a code [{response.status_code}] with content [{response.text}]")
 
-    def create_user_profile(self, wenet_user_id: str, headers: Optional[dict] = None) -> None:
+    def create_user_profile(self, wenet_user_id: str, headers: Optional[dict] = None, request_records: Optional[list] = None) -> None:
         if headers is not None:
             headers.update(self._base_headers)
         else:
             headers = self._base_headers
 
-        response = self._client.post(f"{self._base_url}{self.USER_ENDPOINT}/profile/{wenet_user_id}", {}, headers=headers)
+        response = self._client.post(f"{self._base_url}{self.USER_ENDPOINT}/profile/{wenet_user_id}", {}, headers=headers, request_records=request_records)
 
         if response.status_code not in [200, 201]:
             if response.status_code in [401, 403]:
@@ -160,13 +160,13 @@ class ServiceApiInterface(ComponentInterface):
             else:
                 raise CreationError(response.status_code, response.text)
 
-    def update_user_profile(self, wenet_user_id: str, profile: CoreWeNetUserProfile, headers: Optional[dict] = None) -> WeNetUserProfile:
+    def update_user_profile(self, wenet_user_id: str, profile: CoreWeNetUserProfile, headers: Optional[dict] = None, request_records: Optional[list] = None) -> WeNetUserProfile:
         if headers is not None:
             headers.update(self._base_headers)
         else:
             headers = self._base_headers
 
-        response = self._client.put(f"{self._base_url}{self.USER_ENDPOINT}/profile/{wenet_user_id}", profile.to_repr(), headers=headers)
+        response = self._client.put(f"{self._base_url}{self.USER_ENDPOINT}/profile/{wenet_user_id}", profile.to_repr(), headers=headers, request_records=request_records)
 
         if response.status_code == 200:
             return WeNetUserProfile.from_repr(response.json())
@@ -177,7 +177,7 @@ class ServiceApiInterface(ComponentInterface):
         else:
             raise Exception(f"Request has return a code [{response.status_code}] with content [{response.text}]")
 
-    def get_opened_tasks_of_user(self, wenet_user_id: str, app_id: str, headers: Optional[dict] = None) -> List[Task]:
+    def get_opened_tasks_of_user(self, wenet_user_id: str, app_id: str, headers: Optional[dict] = None, request_records: Optional[list] = None) -> List[Task]:
         if headers is not None:
             headers.update(self._base_headers)
         else:
@@ -186,7 +186,7 @@ class ServiceApiInterface(ComponentInterface):
         tasks = []
         response = self._client.get(f"{self._base_url}{self.TASK_ENDPOINT}s",
                                     query_params={"appId": app_id, "requesterId": wenet_user_id, "hasCloseTs": False},
-                                    headers=headers)
+                                    headers=headers, request_records=request_records)
 
         if response.status_code == 200:
             task_page = TaskPage.from_repr(response.json())
@@ -195,7 +195,7 @@ class ServiceApiInterface(ComponentInterface):
                 offset = len(tasks)
                 response = self._client.get(f"{self._base_url}{self.TASK_ENDPOINT}s",
                                             query_params={"appId": app_id, "requesterId": wenet_user_id, "offset": offset},
-                                            headers=headers)
+                                            headers=headers, request_records=request_records)
                 task_page = TaskPage.from_repr(response.json())
                 tasks.extend(task_page.tasks)
             return tasks
@@ -220,7 +220,8 @@ class ServiceApiInterface(ComponentInterface):
                       deadline_from: Optional[datetime] = None,
                       deadline_to: Optional[datetime] = None,
                       offset: int = 0,
-                      headers: Optional[dict] = None
+                      headers: Optional[dict] = None,
+                      request_records: Optional[list] = None
                       ) -> List[Task]:
         """
         Get the tasks specifying parameters
@@ -291,7 +292,8 @@ class ServiceApiInterface(ComponentInterface):
                       deadline_to: Optional[datetime] = None,
                       offset: int = 0,
                       limit: Optional[int] = 100,
-                      headers: Optional[dict] = None
+                      headers: Optional[dict] = None,
+                      request_records: Optional[list] = None
                       ) -> TaskPage:
         """
         Get a page of tasks specifying parameters
@@ -348,7 +350,7 @@ class ServiceApiInterface(ComponentInterface):
             if query_params_temp[key] is not None:
                 query_params[key] = query_params_temp[key]
 
-        response = self._client.get(f"{self._base_url}{self.TASK_ENDPOINT}s", query_params=query_params, headers=headers)
+        response = self._client.get(f"{self._base_url}{self.TASK_ENDPOINT}s", query_params=query_params, headers=headers, request_records=request_records)
 
         if response.status_code == 200:
             return TaskPage.from_repr(response.json())
@@ -357,7 +359,7 @@ class ServiceApiInterface(ComponentInterface):
         else:
             raise Exception(f"Request has return a code [{response.status_code}] with content [{response.text}]")
 
-    def get_all_tasks_of_application(self, app_id: str, headers: Optional[dict] = None) -> List[Task]:
+    def get_all_tasks_of_application(self, app_id: str, headers: Optional[dict] = None, request_records: Optional[list] = None) -> List[Task]:
         if headers is not None:
             headers.update(self._base_headers)
         else:
@@ -366,7 +368,7 @@ class ServiceApiInterface(ComponentInterface):
         tasks = []
         response = self._client.get(f"{self._base_url}{self.TASK_ENDPOINT}s",
                                     query_params={"appId": app_id, "hasCloseTs": False},
-                                    headers=headers)
+                                    headers=headers, request_records=request_records)
 
         if response.status_code == 200:
             task_page = TaskPage.from_repr(response.json())
@@ -375,7 +377,7 @@ class ServiceApiInterface(ComponentInterface):
                 offset = len(tasks)
                 response = self._client.get(f"{self._base_url}{self.TASK_ENDPOINT}s",
                                             query_params={"appId": app_id, "offset": offset},
-                                            headers=headers)
+                                            headers=headers, request_records=request_records)
                 task_page = TaskPage.from_repr(response.json())
                 tasks.extend(task_page.tasks)
             return tasks
@@ -386,13 +388,13 @@ class ServiceApiInterface(ComponentInterface):
         else:
             raise Exception(f"Request has return a code [{response.status_code}] with content [{response.text}]")
 
-    def log_message(self, message: BaseMessage, headers: Optional[dict] = None) -> None:
+    def log_message(self, message: BaseMessage, headers: Optional[dict] = None, request_records: Optional[list] = None) -> None:
         if headers is not None:
             headers.update(self._base_headers)
         else:
             headers = self._base_headers
 
-        response = self._client.post(f"{self._base_url}{self.LOG_ENDPOINT}", body=message.to_repr(), headers=headers)
+        response = self._client.post(f"{self._base_url}{self.LOG_ENDPOINT}", body=message.to_repr(), headers=headers, request_records=request_records)
 
         if response.status_code not in [200, 201]:
             if response.status_code in [401, 403]:
@@ -400,13 +402,13 @@ class ServiceApiInterface(ComponentInterface):
             else:
                 raise CreationError(response.status_code, response.text)
 
-    def update_user_competences(self, wenet_user_id: str, competences: list, headers: Optional[dict] = None):
+    def update_user_competences(self, wenet_user_id: str, competences: list, headers: Optional[dict] = None, request_records: Optional[list] = None):
         if headers is not None:
             headers.update(self._base_headers)
         else:
             headers = self._base_headers
 
-        response = self._client.put(f"{self._base_url}{self.USER_ENDPOINT}/profile/{wenet_user_id}/competences", body=competences, headers=headers)
+        response = self._client.put(f"{self._base_url}{self.USER_ENDPOINT}/profile/{wenet_user_id}/competences", body=competences, headers=headers, request_records=request_records)
 
         if response.status_code == 200:
             return response.json()
@@ -417,13 +419,13 @@ class ServiceApiInterface(ComponentInterface):
         else:
             raise Exception(f"Request has return a code [{response.status_code}] with content [{response.text}]")
 
-    def update_user_materials(self, wenet_user_id: str, materials: list, headers: Optional[dict] = None):
+    def update_user_materials(self, wenet_user_id: str, materials: list, headers: Optional[dict] = None, request_records: Optional[list] = None):
         if headers is not None:
             headers.update(self._base_headers)
         else:
             headers = self._base_headers
 
-        response = self._client.put(f"{self._base_url}{self.USER_ENDPOINT}/profile/{wenet_user_id}/materials", body=materials, headers=headers)
+        response = self._client.put(f"{self._base_url}{self.USER_ENDPOINT}/profile/{wenet_user_id}/materials", body=materials, headers=headers, request_records=request_records)
 
         if response.status_code == 200:
             return response.json()
@@ -434,13 +436,13 @@ class ServiceApiInterface(ComponentInterface):
         else:
             raise Exception(f"Request has return a code [{response.status_code}] with content [{response.text}]")
 
-    def update_user_meanings(self, wenet_user_id: str, meanings: list, headers: Optional[dict] = None):
+    def update_user_meanings(self, wenet_user_id: str, meanings: list, headers: Optional[dict] = None, request_records: Optional[list] = None):
         if headers is not None:
             headers.update(self._base_headers)
         else:
             headers = self._base_headers
 
-        response = self._client.put(f"{self._base_url}{self.USER_ENDPOINT}/profile/{wenet_user_id}/meanings", body=meanings, headers=headers)
+        response = self._client.put(f"{self._base_url}{self.USER_ENDPOINT}/profile/{wenet_user_id}/meanings", body=meanings, headers=headers, request_records=request_records)
 
         if response.status_code == 200:
             return response.json()
@@ -451,13 +453,13 @@ class ServiceApiInterface(ComponentInterface):
         else:
             raise Exception(f"Request has return a code [{response.status_code}] with content [{response.text}]")
 
-    def get_user_competences(self, wenet_user_id: str, headers: Optional[dict] = None):
+    def get_user_competences(self, wenet_user_id: str, headers: Optional[dict] = None, request_records: Optional[list] = None):
         if headers is not None:
             headers.update(self._base_headers)
         else:
             headers = self._base_headers
 
-        response = self._client.get(f"{self._base_url}{self.USER_ENDPOINT}/profile/{wenet_user_id}/competences", headers=headers)
+        response = self._client.get(f"{self._base_url}{self.USER_ENDPOINT}/profile/{wenet_user_id}/competences", headers=headers, request_records=request_records)
 
         if response.status_code == 200:
             return response.json()
@@ -468,13 +470,13 @@ class ServiceApiInterface(ComponentInterface):
         else:
             raise Exception(f"Request has return a code [{response.status_code}] with content [{response.text}]")
     
-    def get_user_materials(self, wenet_user_id: str, headers: Optional[dict] = None):
+    def get_user_materials(self, wenet_user_id: str, headers: Optional[dict] = None, request_records: Optional[list] = None):
         if headers is not None:
             headers.update(self._base_headers)
         else:
             headers = self._base_headers
 
-        response = self._client.get(f"{self._base_url}{self.USER_ENDPOINT}/profile/{wenet_user_id}/materials", headers=headers)
+        response = self._client.get(f"{self._base_url}{self.USER_ENDPOINT}/profile/{wenet_user_id}/materials", headers=headers, request_records=request_records)
 
         if response.status_code == 200:
             return response.json()
@@ -485,13 +487,13 @@ class ServiceApiInterface(ComponentInterface):
         else:
             raise Exception(f"Request has return a code [{response.status_code}] with content [{response.text}]")
 
-    def get_user_meanings(self, wenet_user_id: str, headers: Optional[dict] = None):
+    def get_user_meanings(self, wenet_user_id: str, headers: Optional[dict] = None, request_records: Optional[list] = None):
         if headers is not None:
             headers.update(self._base_headers)
         else:
             headers = self._base_headers
 
-        response = self._client.get(f"{self._base_url}{self.USER_ENDPOINT}/profile/{wenet_user_id}/meanings", headers=headers)
+        response = self._client.get(f"{self._base_url}{self.USER_ENDPOINT}/profile/{wenet_user_id}/meanings", headers=headers, request_records=request_records)
 
         if response.status_code == 200:
             return response.json()
